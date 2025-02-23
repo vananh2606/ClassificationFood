@@ -13,11 +13,14 @@ def load_model(model_path, num_classes):
     Load trained model from checkpoint
     """
     # Khởi tạo model
-    model = models.resnet18(pretrained=True)
+    # model = models.resnet18(pretrained=True)
+    model = models.efficientnet_b0(pretrained=True)
 
     # Thay đổi fully connected layer cuối cùng
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, num_classes)
+    # num_ftrs = model.fc.in_features
+    # model.fc = nn.Linear(num_ftrs, num_classes)
+    num_ftrs = model.classifier[1].in_features
+    model.classifier[1] = nn.Linear(num_ftrs, num_classes)
 
     # Load trained weights
     checkpoint = torch.load(model_path)
@@ -213,8 +216,9 @@ def predict_folder(model, folder_path, device, labels_map):
 
 def main():
     # Các thông số
-    MODEL_PATH = "models/GGNet/best_model_restnet18.pth"  # hoặc 'final_model.pth'
-    IMAGE_PATH = "pizza_steak/test/steak/4889.jpg"  # Đường dẫn đến ảnh cần dự đoán
+    # MODEL_PATH = "models/ResNet18/best_model_resnet18.pth"  # hoặc 'final_model.pth'
+    MODEL_PATH = "models/ENet/best_model_enet.pth"  # hoặc 'final_model.pth'
+    IMAGE_PATH = "10_food_classes_all_data/test/steak/4889.jpg"  # Đường dẫn đến ảnh cần dự đoán
     FOLDER_PATH = "10_food_classes_all_data/test/pizza"  # Đường dẫn đến folder chứa ảnh
 
     # Labels mapping

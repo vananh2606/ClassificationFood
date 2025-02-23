@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+from early_stopping import EarlyStopping
 
 def train_model(
     model,
@@ -13,6 +14,7 @@ def train_model(
     device,
     num_epochs=10,
     dataset_sizes=None,
+    scheduler=None,
 ):
     """
     Train a PyTorch model for food classification.
@@ -31,6 +33,9 @@ def train_model(
         model: Trained model
         history: Training history
     """
+    # Khởi tạo EarlyStopping
+    early_stopping = EarlyStopping(patience=5, min_delta=1e-4, verbose=True)
+    
     # Khởi tạo dictionary để lưu history
     history = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
 
@@ -58,42 +63,31 @@ def train_model(
 
             # Iterate over data
             for inputs, labels in pbar:
-                inputs = inputs.to(device)  # Chuyển data sang device.
-                labels = labels.to(device)  # Chuyển labels sang device.
+                inputs = inputs.to(device)
+                labels = labels.to(device)
 
-                # Zero the parameter gradients
-                optimizer.zero_grad()  # Xóa gradient trước khi tính toán gradient mới.
+                optimizer.zero_grad()
 
                 # Forward pass
                 with torch.set_grad_enabled(phase == "train"):
-                    outputs = model(inputs)  # Tính toán output của model.
-                    _, preds = torch.max(
-                        outputs, 1
-                    )  # Lấy ra class có xác suất cao nhất.
-                    loss = criterion(outputs, labels)  # Tính toán loss.
+                    outputs = model(inputs)
+                    _, preds = torch.max(outputs, 1)
+                    loss = criterion(outputs, labels)
 
                     # Backward + optimize only if in training phase
                     if phase == "train":
-                        loss.backward()  # Tính toán gradient qua backpropagation.
-                        optimizer.step()  # Cập nhật weights.
+                        loss.backward()
+                        optimizer.step()
 
                 # Statistics
-                running_loss += loss.item() * inputs.size(
-                    0
-                )  # Tính tổng loss của mỗi epoch.
-                running_corrects += torch.sum(
-                    preds == labels.data
-                )  # Tính tổng số predictions đúng.
+                running_loss += loss.item() * inputs.size(0)
+                running_corrects += torch.sum(preds == labels.data)
 
                 # Update progress bar
                 pbar.set_postfix({"loss": f"{loss.item():.4f}"})
 
-            epoch_loss = (
-                running_loss / dataset_sizes[phase]
-            )  # Tính loss trung bình của mỗi epoch.
-            epoch_acc = (
-                running_corrects.double() / dataset_sizes[phase]
-            )  # Tính accuracy của mỗi epoch.
+            epoch_loss = running_loss / dataset_sizes[phase]
+            epoch_acc = running_corrects.double() / dataset_sizes[phase]
 
             # Save history
             if phase == "train":
@@ -105,19 +99,35 @@ def train_model(
 
             print(f"{phase} Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
 
-            # Lưu best model
-            if phase == "test" and epoch_acc > best_acc:
-                best_acc = epoch_acc
-                torch.save(
-                    {
-                        "epoch": epoch,
-                        "model_state_dict": model.state_dict(),
-                        "optimizer_state_dict": optimizer.state_dict(),
-                        "loss": epoch_loss,
-                        "acc": epoch_acc,
-                    },
-                    "models/GGNet/best_model_ggnet.pth",
-                )
+            # Early Stopping và save best model
+            if phase == "test":
+                # Check Early Stopping
+                if early_stopping(epoch_loss, model, optimizer, epoch, history):
+                    print("\nRestoring best model weights...")
+                    best_state = early_stopping.get_best_state()
+                    model.load_state_dict(best_state['model_state_dict'])
+                    print(f"Best model was from epoch {best_state['epoch']+1}")
+                    # Plot training history
+                    plot_training_history(history)
+                    return model, history
+
+                # Lưu best model dựa trên accuracy
+                if epoch_acc > best_acc:
+                    best_acc = epoch_acc
+                    torch.save(
+                        {
+                            "epoch": epoch,
+                            "model_state_dict": model.state_dict(),
+                            "optimizer_state_dict": optimizer.state_dict(),
+                            "loss": epoch_loss,
+                            "acc": epoch_acc,
+                        },
+                        "models/ENet/best_model_enet.pth",
+                    )
+
+                # Gọi ReduceLROnPlateau nếu cần để giảm Learning Rate nếu test loss không giảm
+                if scheduler is not None:
+                    scheduler.step(epoch_loss)
 
         print()
 
@@ -156,5 +166,5 @@ def plot_training_history(history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("models/GGNet/training_history_ggnet.png")
+    plt.savefig("models/Enet/training_history_enet.png")
     plt.show()
