@@ -122,7 +122,7 @@ def train_model(
                             "loss": epoch_loss,
                             "acc": epoch_acc,
                         },
-                        "models/ENet/best_model_enet.pth",
+                        "models/CustomModel/best_model_stem.pth",
                     )
 
                 # Gọi ReduceLROnPlateau nếu cần để giảm Learning Rate nếu test loss không giảm
@@ -166,5 +166,5 @@ def plot_training_history(history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("models/Enet/training_history_enet.png")
+    plt.savefig("models/CustomModel/training_history_stem.png")
     plt.show()

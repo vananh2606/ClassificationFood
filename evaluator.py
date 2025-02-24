@@ -36,5 +36,5 @@ def plot_confusion_matrix(y_true, y_pred):
     plt.xlabel("Predicted")
     plt.ylabel("True")
     plt.title("Confusion Matrix")
-    plt.savefig("models/ENet/confusion_matrix_enet.png")
+    plt.savefig("models/CustomModel/confusion_matrix_stem.png")
     plt.show()

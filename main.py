@@ -9,7 +9,7 @@ from torchvision import models, transforms
 from torch.utils.data import DataLoader
 
 from dataset import FoodDataset
-from model import CustomCNN
+from model import CustomCNN, CustomStem
 from trainer import train_model
 from evaluator import evaluate_model
 
@@ -19,7 +19,7 @@ def main():
     TRAIN_PATH = "10_food_classes_all_data/train"
     TEST_PATH = "10_food_classes_all_data/test"
     BATCH_SIZE = 32
-    NUM_EPOCHS = 10
+    NUM_EPOCHS = 25
     LEARNING_RATE = 0.001
 
     # Map giữa index và tên class
@@ -112,8 +112,9 @@ def main():
     # num_features = model.fc.in_features # ResNet18, GoogleNet
     # model.fc = nn.Linear(num_features, num_classes) # ResNet18, GoogleNet
 
-    # Sử dụng model customCNN
-    model = CustomCNN(num_classes)
+    # Sử dụng model 
+    # model = CustomCNN(num_classes)
+    model = CustomStem(num_classes)
 
     # Chuyển mô hình sang device
     model = model.to(device)
@@ -147,11 +148,11 @@ def main():
             "optimizer_state_dict": optimizer.state_dict(),
             "history": history,
         },
-        "models/ENet/final_model_enet.pth",
+        "models/CustomModel/final_model_stem.pth",
     )
 
     # Load model tốt nhất và đánh giá
-    checkpoint = torch.load("models/ENet/best_model_enet.pth")
+    checkpoint = torch.load("models/CustomModel/best_model_stem.pth")
     model.load_state_dict(checkpoint["model_state_dict"])
 
     # Đánh giá model
