@@ -5,7 +5,8 @@ from tqdm import tqdm
 
 from early_stopping import EarlyStopping
 
-def train_model(
+
+def train_and_val(
     model,
     criterion,
     optimizer,
@@ -35,7 +36,7 @@ def train_model(
     """
     # Khởi tạo EarlyStopping
     early_stopping = EarlyStopping(patience=5, min_delta=1e-4, verbose=True)
-    
+
     # Khởi tạo dictionary để lưu history
     history = {"train_loss": [], "train_acc": [], "test_loss": [], "test_acc": []}
 
@@ -105,7 +106,7 @@ def train_model(
                 if early_stopping(epoch_loss, model, optimizer, epoch, history):
                     print("\nRestoring best model weights...")
                     best_state = early_stopping.get_best_state()
-                    model.load_state_dict(best_state['model_state_dict'])
+                    model.load_state_dict(best_state["model_state_dict"])
                     print(f"Best model was from epoch {best_state['epoch']+1}")
                     # Plot training history
                     plot_training_history(history)
