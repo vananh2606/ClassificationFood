@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 from dataset import FoodDataset
 from model import CustomCNN, CustomStem
-from trainer import train_model
+from train_val import train_and_val
 from evaluator import evaluate_model
 
 
@@ -67,7 +67,7 @@ def main():
     train_dataset = FoodDataset(TRAIN_PATH, transform=data_transforms["train"])
     test_dataset = FoodDataset(TEST_PATH, transform=data_transforms["test"])
 
-    # Tạo dataloaders
+    # Tạo dataloader
     train_dataloader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
@@ -84,11 +84,10 @@ def main():
 
     # Show images
     images, labels = next(iter(train_dataloader))
-    images = images.numpy()
-    plt.figure(figsize=(16, 16))
-    for i in range(32):
-        plt.subplot(4, 8, i + 1)
-        plt.imshow(np.transpose(images[i], (1, 2, 0)))
+    plt.figure(figsize=(int(BATCH_SIZE / 2), int(BATCH_SIZE / 2)))
+    for i in range(BATCH_SIZE):
+        plt.subplot(4, int(BATCH_SIZE / 4), i + 1)
+        plt.imshow(np.transpose(images[i], (1, 2, 0)))  # From (C, H, W) to (H, W, C)
         for idx, class_name in labels_map.items():
             if labels[i] == idx:
                 plt.title(class_name)
@@ -107,10 +106,12 @@ def main():
     #     param.requires_grad = False
 
     ## Thay đổi fully connected layer cuối cùng
-    # num_features = model.classifier[1].in_features # ENetB0
-    # model.classifier[1] = nn.Linear(num_features, num_classes) # ENetB0
-    # num_features = model.fc.in_features # ResNet18, GoogleNet
-    # model.fc = nn.Linear(num_features, num_classes) # ResNet18, GoogleNet
+    # if hasattr(model, 'fc'):
+    #     num_features = model.fc.in_features # ResNet18, GoogleNet
+    #     model.fc = nn.Linear(num_features, num_classes) # ResNet18, GoogleNet
+    # if hasattr(model, 'classifier'):
+    #     num_features = model.classifier[1].in_features # ENetB0
+    #     model.classifier[1] = nn.Linear(num_features, num_classes) # ENetB0
 
     # Sử dụng model 
     # model = CustomCNN(num_classes)
@@ -121,16 +122,21 @@ def main():
 
     # Định nghĩa loss function và optimizer
     criterion = nn.CrossEntropyLoss()
-    # optimizer = optim.Adam(model.classifier[1].parameters(), lr=LEARNING_RATE) # ENetB0
-    # optimizer = optim.Adam(model.fc.parameters(), lr=LEARNING_RATE) # ResNet18, GoogleNet
+    # if hasattr(model, 'fc'):
+    #     optimizer = optim.Adam(model.fc.parameters(), lr=LEARNING_RATE) # ResNet18, GoogleNet
+    # if hasattr(model, 'classifier'):
+    #     optimizer = optim.Adam(model.classifier[1].parameters(), lr=LEARNING_RATE) # ENetB0
+
     optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # Learning Rate Scheduler (giảm LR khi loss không giảm)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', patience=3, factor=0.1, verbose=True)
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, mode="min", patience=3, factor=0.1, verbose=True
+    )
 
     # Train model
-    model, history = train_model(
-        model=model,   
+    model, history = train_and_val(
+        model=model,
         criterion=criterion,
         optimizer=optimizer,
         train_dataloader=train_dataloader,
@@ -138,7 +144,7 @@ def main():
         device=device,
         num_epochs=NUM_EPOCHS,
         dataset_sizes=dataset_sizes,
-        scheduler=None
+        scheduler=scheduler,
     )
 
     # Lưu model cuối cùng

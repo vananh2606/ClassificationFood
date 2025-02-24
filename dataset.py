@@ -1,6 +1,7 @@
 import os
 from torch.utils.data import Dataset
 import cv2 as cv
+import matplotlib.pyplot as plt
 
 # Labels mapping
 labels_map = {
@@ -36,9 +37,27 @@ class FoodDataset(Dataset):
         return len(self.images)
 
     def __getitem__(self, idx):
+        # print(
+        #     f"Index requested: {idx}, Total images: {len(self.images)}, Total labels: {len(self.labels)}"
+        # )
         image = cv.imread(self.images[idx])
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         label = self.labels[idx]
         if self.transform:
             image = self.transform(image)
         return image, label
+
+
+def main():
+    PATH_FOLDER = "10_food_classes_all_data/test"
+    food_dataset = FoodDataset(PATH_FOLDER)
+
+    # Visualize image
+    image, label = food_dataset[0]
+    plt.imshow(image)
+    plt.title(labels_map[label])
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
