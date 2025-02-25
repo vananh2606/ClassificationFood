@@ -54,7 +54,7 @@ def evaluate_model(model, test_loader, device, class_names):
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    with open("models/EnetB0/model_evaluation_enetB0+.txt", "w") as f:
+    with open("models/CustomModel/model_evaluation_cm+.txt", "w") as f:
         f.write(f"Accuracy Score: {acc:.2f}\n\n")
         f.write("Classification Report:\n")
         f.write(class_report + "\n\n")
@@ -91,5 +91,5 @@ def plot_confusion_matrix(y_true, y_pred, class_names):
     plt.xlabel("Predicted")
     plt.ylabel("True")
     plt.title("Confusion Matrix")
-    plt.savefig("models/EnetB0/confusion_matrix_enetB0+.png")
+    plt.savefig("models/CustomModel/confusion_matrix_cm+.png")
     plt.show()

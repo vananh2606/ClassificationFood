@@ -25,7 +25,7 @@ def main():
     VAL_PATH = "10_food_classes_all_data/val"
     TEST_PATH = "10_food_classes_all_data/test"
     BATCH_SIZE = 32
-    NUM_EPOCHS = 10
+    NUM_EPOCHS = 50
     LEARNING_RATE = 0.001
 
     # Xác định device
@@ -66,41 +66,41 @@ def main():
     # # Load mô hình ResNet18 pre-trained
     # model = models.resnet18(pretrained=True)
     # # Load mô hình GoogleNet pre-trained
-    model = models.googlenet(pretrained=True)
+    # model = models.googlenet(pretrained=True)
     # # Load mô hình EfficientNet pre-trained
     # model = models.efficientnet_b0(pretrained=True)
 
-    # Freeze các layers
-    for param in model.parameters():
-        param.requires_grad = False
+    # # Freeze các layers
+    # for param in model.parameters():
+    #     param.requires_grad = False
 
-    # Thay đổi fully connected layer cuối cùng
-    if hasattr(model, "fc"):
-        num_features = model.fc.in_features  # ResNet18, GoogleNet
-        model.fc = nn.Linear(num_features, num_classes)  # ResNet18, GoogleNet
-    if hasattr(model, "classifier"):
-        num_features = model.classifier[1].in_features  # ENetB0
-        model.classifier[1] = nn.Linear(num_features, num_classes)  # ENetB0
+    # # Thay đổi fully connected layer cuối cùng
+    # if hasattr(model, "fc"):
+    #     num_features = model.fc.in_features  # ResNet18, GoogleNet
+    #     model.fc = nn.Linear(num_features, num_classes)  # ResNet18, GoogleNet
+    # if hasattr(model, "classifier"):
+    #     num_features = model.classifier[1].in_features  # ENetB0
+    #     model.classifier[1] = nn.Linear(num_features, num_classes)  # ENetB0
 
     # Sử dụng model
     # model = CustomCNN(num_classes)
-    # model = CustomCNNPlus(num_classes)
+    model = CustomCNNPlus(num_classes)
 
     # Chuyển mô hình sang device
     model = model.to(device)
 
     # Định nghĩa loss function và optimizer
     criterion = nn.CrossEntropyLoss()
-    if hasattr(model, "fc"):
-        optimizer = optim.Adam(
-            model.fc.parameters(), lr=LEARNING_RATE
-        )  # ResNet18, GoogleNet
-    if hasattr(model, "classifier"):
-        optimizer = optim.Adam(
-            model.classifier[1].parameters(), lr=LEARNING_RATE
-        )  # ENetB0
+    # if hasattr(model, "fc"):
+    #     optimizer = optim.Adam(
+    #         model.fc.parameters(), lr=LEARNING_RATE
+    #     )  # ResNet18, GoogleNet
+    # if hasattr(model, "classifier"):
+    #     optimizer = optim.Adam(
+    #         model.classifier[1].parameters(), lr=LEARNING_RATE
+    #     )  # ENetB0
 
-    # optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     # Learning Rate Scheduler (giảm LR khi loss không giảm)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
@@ -127,11 +127,11 @@ def main():
             "scheduler_state_dict": scheduler.state_dict() if scheduler else None,
             "history": history,
         },
-        "models/EnetB0/final_model_enetB0+.pth",
+        "models/CustomModel/final_model_cm+.pth",
     )
 
     # Load model tốt nhất và đánh giá
-    checkpoint = torch.load("models/EnetB0/best_model_enetB0+.pth")
+    checkpoint = torch.load("models/CustomModel/best_model_cm+.pth")
     model.load_state_dict(checkpoint["model_state_dict"])
 
     # Đánh giá model

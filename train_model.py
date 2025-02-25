@@ -28,7 +28,7 @@ class EarlyStopping:
         get_best_state(): Trả về trạng thái tốt nhất của mô hình.
     """
 
-    def __init__(self, patience=5, min_delta=0, verbose=True):
+    def __init__(self, patience=10, min_delta=0, verbose=True):
         self.patience = patience
         self.min_delta = min_delta
         self.verbose = verbose
@@ -142,7 +142,7 @@ def train_model(
                     "loss": val_loss,
                     "acc": val_acc,
                 },
-                "models/EnetB0/best_model_enetB0+.pth",
+                "models/CustomModel/best_model_cm+.pth",
             )
 
         if scheduler is not None:
@@ -240,5 +240,5 @@ def plot_training_history(history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("models/EnetB0/training_history_enetB0+.png")
+    plt.savefig("models/CustomModel/training_history_cm+.png")
     plt.show()
