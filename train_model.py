@@ -142,7 +142,7 @@ def train_model(
                     "loss": val_loss,
                     "acc": val_acc,
                 },
-                "models/GGNet/best_model_ggnet+.pth",
+                "models/EnetB0/best_model_enetB0+.pth",
             )
 
         if scheduler is not None:
@@ -240,5 +240,5 @@ def plot_training_history(history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("models/GGNet/training_history_ggnet+.png")
+    plt.savefig("models/EnetB0/training_history_enetB0+.png")
     plt.show()

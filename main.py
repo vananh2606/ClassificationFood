@@ -127,11 +127,11 @@ def main():
             "scheduler_state_dict": scheduler.state_dict() if scheduler else None,
             "history": history,
         },
-        "models/GGNet/final_model_ggnet+.pth",
+        "models/EnetB0/final_model_enetB0+.pth",
     )
 
     # Load model tốt nhất và đánh giá
-    checkpoint = torch.load("models/GGNet/best_model_ggnet+.pth")
+    checkpoint = torch.load("models/EnetB0/best_model_enetB0+.pth")
     model.load_state_dict(checkpoint["model_state_dict"])
 
     # Đánh giá model
