@@ -128,13 +128,11 @@ def visualie_dataloader(size, images, labels):
         images (torch.Tensor): Tensor chứa các hình ảnh.
         labels (torch.Tensor): Tensor chứa nhãn của các hình ảnh.
     """
-    plt.figure(figsize=(int(size / 2), int(size / 2)))
+    plt.figure(figsize=(size // 2, size // 2))
     for i in range(size):
-        plt.subplot(4, int(size / 4), i + 1)
-        plt.imshow(np.transpose(images[i], (1, 2, 0)))  # (C, H, W) -> (H, W, C)
-        for idx, class_name in labels_map.items():
-            if labels[i] == idx:
-                plt.title(class_name)
+        plt.subplot(4, size // 4, i + 1)
+        plt.imshow(np.transpose(np.clip(images[i], 0, 1), (1, 2, 0)))  # (C, H, W) -> (H, W, C)
+        plt.title(labels_map.get(labels[i].item(), "Unknown"))
         plt.axis("off")
 
     plt.show()

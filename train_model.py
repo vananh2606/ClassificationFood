@@ -117,8 +117,8 @@ def train_model(
     history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
     best_acc = 0.0
 
+    since = time.time()
     for epoch in range(num_epochs):
-        since = time.time()
         print(f"Epoch {epoch+1}/{num_epochs}\n" + "-" * 10)
 
         # Phase training
