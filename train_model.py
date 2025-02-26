@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
@@ -23,12 +24,12 @@ class EarlyStopping:
         best_state (dict): Trạng thái tốt nhất của mô hình (bao gồm trọng số, optimizer, v.v.).
 
     Methods:
-        __call__(val_loss, model, optimizer, epoch, history): Kiểm tra xem có nên early stopping hay không dựa trên val_loss hiện tại.
-        save_checkpoint(model, optimizer, epoch, loss, history): Lưu checkpoint của mô hình nếu có cải thiện.
+        __call__(val_loss, val_acc, model, optimizer, epoch, history): Kiểm tra xem có nên early stopping hay không dựa trên val_loss hiện tại.
+        save_checkpoint(model, optimizer, epoch, val_loss, val_acc, history): Lưu checkpoint của mô hình nếu có cải thiện.
         get_best_state(): Trả về trạng thái tốt nhất của mô hình.
     """
 
-    def __init__(self, patience=10, min_delta=0, verbose=True):
+    def __init__(self, patience=5, min_delta=0, verbose=True):
         self.patience = patience
         self.min_delta = min_delta
         self.verbose = verbose
@@ -37,32 +38,44 @@ class EarlyStopping:
         self.early_stop = False
         self.best_state = None
 
-    def __call__(self, val_loss, model, optimizer, epoch, history):
+    def __call__(self, val_loss, val_acc, model, optimizer, scheduler, epoch, history):
         if self.best_loss is None:
             self.best_loss = val_loss
-            self.save_checkpoint(model, optimizer, epoch, val_loss, history)
+            self.save_checkpoint(
+                model, optimizer, scheduler, epoch, val_loss, val_acc, history
+            )
         elif val_loss > self.best_loss - self.min_delta:
             self.counter += 1
             if self.verbose:
-                print(f"\nEarlyStopping counter: {self.counter} out of {self.patience}")
+                print(
+                    f"\nBộ đếm Early Stopping: {self.counter} trên tổng số {self.patience}"
+                )
             if self.counter >= self.patience:
                 self.early_stop = True
                 if self.verbose:
-                    print("\nEarly stopping triggered")
+                    print("\nEarly Stopping được kích hoạt")
         else:
             self.best_loss = val_loss
-            self.save_checkpoint(model, optimizer, epoch, val_loss, history)
+            self.save_checkpoint(
+                model, optimizer, scheduler, epoch, val_loss, val_acc, history
+            )
             self.counter = 0
 
         return self.early_stop
 
-    def save_checkpoint(self, model, optimizer, epoch, loss, history):
+    def save_checkpoint(
+        self, model, optimizer, scheduler, epoch, val_loss, val_acc, history
+    ):
         """Lưu model checkpoint tốt nhất"""
         self.best_state = {
             "epoch": epoch,
             "model_state_dict": model.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
-            "loss": loss,
+            "scheduler_state_dict": (
+                scheduler.state_dict() if scheduler is not None else None
+            ),
+            "val_loss": val_loss,
+            "val_acc": val_acc,
             "history": history,
         }
 
@@ -75,11 +88,11 @@ def train_model(
     model,
     criterion,
     optimizer,
+    scheduler,
     train_dataloader,
     val_dataloader,
     device,
     num_epochs=10,
-    scheduler=None,
 ):
     """Huấn luyện mô hình PyTorch.
 
@@ -91,11 +104,11 @@ def train_model(
         model (nn.Module): Mô hình PyTorch cần được huấn luyện.
         criterion (callable): Loss function.
         optimizer (optim.Optimizer): Optimizer.
+        scheduler (torch.optim.lr_scheduler, optional): Learning rate scheduler.
         train_dataloader (DataLoader): DataLoader cho tập huấn luyện.
         val_dataloader (DataLoader): DataLoader cho tập validation.
         device (torch.device): Thiết bị để huấn luyện mô hình (ví dụ: 'cuda' hoặc 'cpu').
         num_epochs (int, optional): Số epoch để huấn luyện. Mặc định là 10.
-        scheduler (torch.optim.lr_scheduler, optional): Learning rate scheduler. Mặc định là None.
 
     Returns:
         tuple: Mô hình đã huấn luyện và history training.
@@ -103,11 +116,12 @@ def train_model(
     early_stopping = EarlyStopping(patience=5, min_delta=1e-4, verbose=True)
     history = {"train_loss": [], "train_acc": [], "val_loss": [], "val_acc": []}
     best_acc = 0.0
-    best_loss = float("inf")
 
     for epoch in range(num_epochs):
+        since = time.time()
         print(f"Epoch {epoch+1}/{num_epochs}\n" + "-" * 10)
 
+        # Phase training
         train_loss, train_acc = train_one_epoch(
             model, criterion, optimizer, train_dataloader, device
         )
@@ -115,41 +129,46 @@ def train_model(
         history["train_acc"].append(train_acc)
         print(f"Train Loss: {train_loss:.4f} Acc: {train_acc:.4f}")
 
+        # Phase validation
         val_loss, val_acc = val_one_epoch(model, criterion, val_dataloader, device)
         history["val_loss"].append(val_loss)
         history["val_acc"].append(val_acc)
         print(f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}")
 
-        if early_stopping(val_loss, model, optimizer, epoch, history):
-            print("\nRestoring best model weights...")
+        # Cập nhật learning rate scheduler nếu có
+        if scheduler is not None:
+            scheduler.step(val_loss)
+
+        if early_stopping(
+            val_loss, val_acc, model, optimizer, scheduler, epoch, history
+        ):
+            print("\nĐang khôi phục trọng số mô hình tốt nhất...")
             best_state = early_stopping.get_best_state()
             model.load_state_dict(best_state["model_state_dict"])
-            print(f"Best model was from epoch {best_state['epoch']+1}")
+            print(f"Mô hình tốt nhất từ epoch {best_state['epoch']+1}")
             plot_training_history(history)
             return model, history
 
-        if val_acc > best_acc and val_loss < best_loss:
+        if val_acc > best_acc:
             best_acc = val_acc
-            best_loss = val_loss
             torch.save(
                 {
                     "epoch": epoch,
                     "model_state_dict": model.state_dict(),
                     "optimizer_state_dict": optimizer.state_dict(),
                     "scheduler_state_dict": (
-                        scheduler.state_dict() if scheduler else None
+                        scheduler.state_dict() if scheduler is not None else None
                     ),
-                    "loss": val_loss,
-                    "acc": val_acc,
+                    "val_acc": val_acc,
+                    "val_loss": val_loss,
+                    "history": history,
                 },
                 "models/CustomModel/best_model_cm+.pth",
             )
 
-        if scheduler is not None:
-            scheduler.step(val_loss)
-
+    time_elapsed = time.time() - since
+    print(f"Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
     print(f"Best val Acc: {best_acc:.4f}")
-    print(f"Best val Loss: {best_loss:.4f}")
     plot_training_history(history)
     return model, history
 
@@ -163,25 +182,31 @@ def train_one_epoch(model, criterion, optimizer, train_dataloader, device):
     for images, labels in pbar:
         images, labels = images.to(device), labels.to(device)
 
-        # Zero the parameter gradients
+        # Xóa gradient trước đó
         optimizer.zero_grad()
 
         # Forward pass
-        outputs = model(images)
-        loss = criterion(outputs, labels)
+        outputs = model(images)  # Tính toán output
+        loss = criterion(outputs, labels)  # Tính toán loss
 
-        # Backward pass and optimize
-        loss.backward()
-        optimizer.step()
+        # Backward pass
+        loss.backward()  # Tính toán gradient
+        optimizer.step()  # Cập nhật trọng số
 
-        running_loss += loss.item() * images.size(0)
+        # Tính toán loss trung bình trên batch
+        running_loss += loss.item() * images.size(0)  # image.size(0) = batch_size
+
         _, predicted = torch.max(outputs, dim=1)
+        # Tính toán số lượng dự đoán đúng trên batch
         running_corrects += torch.sum(predicted == labels.data)
 
         pbar.set_postfix({"loss": f"{loss.item():.4f}"})
 
-    epoch_train_loss = running_loss / len(train_dataloader.dataset)
-    epoch_train_acc = running_corrects.double() / len(train_dataloader.dataset)
+    train_dataset_size = len(train_dataloader.dataset)
+    # Tính toán loss trung bình trên epoch
+    epoch_train_loss = running_loss / train_dataset_size
+    # Tính toán accuracy trung bình trên epoch
+    epoch_train_acc = running_corrects.double() / train_dataset_size
     return epoch_train_loss, epoch_train_acc.item()
 
 
@@ -199,14 +224,20 @@ def val_one_epoch(model, criterion, val_dataloader, device):
             outputs = model(images)
             loss = criterion(outputs, labels)
 
-            running_loss += loss.item() * images.size(0)
+            # Tính toán loss trung bình trên batch
+            running_loss += loss.item() * images.size(0)  # image.size(0) = batch_size
+
             _, predicted = torch.max(outputs, dim=1)
+            # Tính toán số lượng dự đoán đúng trên batch
             running_corrects += torch.sum(predicted == labels.data)
 
             pbar.set_postfix({"loss": f"{loss.item():.4f}"})
 
-        epoch_val_loss = running_loss / len(val_dataloader.dataset)
-        epoch_val_acc = running_corrects.double() / len(val_dataloader.dataset)
+        val_dataset_size = len(val_dataloader.dataset)
+        # Tính toán loss trung bình trên epoch
+        epoch_val_loss = running_loss / val_dataset_size
+        # Tính toán accuracy trung bình trên epoch
+        epoch_val_acc = running_corrects.double() / val_dataset_size
         return epoch_val_loss, epoch_val_acc.item()
 
 

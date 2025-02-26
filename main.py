@@ -25,7 +25,7 @@ def main():
     VAL_PATH = "10_food_classes_all_data/val"
     TEST_PATH = "10_food_classes_all_data/test"
     BATCH_SIZE = 32
-    NUM_EPOCHS = 50
+    NUM_EPOCHS = 20
     LEARNING_RATE = 0.001
 
     # Xác định device
@@ -83,8 +83,8 @@ def main():
     #     model.classifier[1] = nn.Linear(num_features, num_classes)  # ENetB0
 
     # Sử dụng model
-    # model = CustomCNN(num_classes)
-    model = CustomCNNPlus(num_classes)
+    model = CustomCNN(num_classes)
+    # model = CustomCNNPlus(num_classes)
 
     # Chuyển mô hình sang device
     model = model.to(device)
@@ -112,11 +112,11 @@ def main():
         model=model,
         criterion=criterion,
         optimizer=optimizer,
+        scheduler=scheduler,
         train_dataloader=train_dataloader,
         val_dataloader=val_dataloader,
         device=device,
         num_epochs=NUM_EPOCHS,
-        scheduler=scheduler,
     )
 
     # Lưu model cuối cùng
