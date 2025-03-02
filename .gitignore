@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 10_food_classes_all_data/
-pizza_steak/
+dataset/

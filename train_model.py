@@ -163,7 +163,7 @@ def train_model(
                     "val_loss": val_loss,
                     "history": history,
                 },
-                "models/CustomModel/best_model_cm+.pth",
+                "models/CustomModel/best_model_cm.pth",
             )
 
     time_elapsed = time.time() - since
@@ -271,5 +271,5 @@ def plot_training_history(history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("models/CustomModel/training_history_cm+.png")
+    plt.savefig("models/CustomModel/training_history_cm.png")
     plt.show()

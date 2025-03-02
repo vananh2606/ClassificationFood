@@ -83,8 +83,8 @@ def main():
     #     model.classifier[1] = nn.Linear(num_features, num_classes)  # ENetB0
 
     # Sử dụng model
-    # model = CustomCNN(num_classes)
-    model = CustomCNNPlus(num_classes)
+    model = CustomCNN(num_classes)
+    # model = CustomCNNPlus(num_classes)
 
     # Chuyển mô hình sang device
     model = model.to(device)
@@ -127,11 +127,11 @@ def main():
             "scheduler_state_dict": scheduler.state_dict() if scheduler else None,
             "history": history,
         },
-        "models/CustomModel/final_model_cm+.pth",
+        "models/CustomModel/final_model_cm.pth",
     )
 
     # Load model tốt nhất và đánh giá
-    checkpoint = torch.load("models/CustomModel/best_model_cm+.pth")
+    checkpoint = torch.load("models/CustomModel/best_model_cm.pth")
     model.load_state_dict(checkpoint["model_state_dict"])
 
     # Đánh giá model

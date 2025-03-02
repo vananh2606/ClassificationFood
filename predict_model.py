@@ -28,7 +28,7 @@ def load_model(model_path, num_classes, device=None):
 
     # # Sử dụng model
     # model = CustomCNN(num_classes)
-    # model = CustomStem(num_classes)
+    # model = CustomCNNPlus(num_classes)
 
     # Chuyển model sang device
     model.to(device)
@@ -229,7 +229,7 @@ def main():
     # Các thông số
     # MODEL_PATH = "models/ResNet18/best_model_resnet18.pth"  # hoặc 'final_model.pth'
     # MODEL_PATH = "models/GGNet/best_model_ggnet.pth"  # hoặc 'final_model.pth'
-    MODEL_PATH = "models/ENetB0/best_model_enetB0.pth"  # hoặc 'final_model.pth'
+    MODEL_PATH = "models/ENetB0/best_model_enetB0+.pth"  # hoặc 'final_model.pth'
     # MODEL_PATH = "models/CustomModel/best_model_stem.pth"  # hoặc 'final_model.pth'
     # IMAGE_PATH = (
     #     "10_food_classes_all_data/test/steak/4889.jpg"  # Đường dẫn đến ảnh cần dự đoán

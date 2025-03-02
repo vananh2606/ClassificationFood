@@ -127,6 +127,8 @@ class CustomCNNPlus(nn.Module):
     def __init__(self, num_classes, dropout_rate=0.2):
         super(CustomCNNPlus, self).__init__()
 
+        # Input: 224x224x3
+
         # Stem: Initial convolution
         self.stem = nn.Sequential(
             nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1, bias=False),
