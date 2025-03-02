@@ -4,6 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
+CONFUSION_MATRIX_PATH = "models/KMS/confusion_matrix_efficient.png"
+EVALUATION_REPORT_PATH = "models/KMS/model_evaluation_efficient.txt"
 
 def evaluate_model(model, test_loader, device, class_names):
     """Đánh giá mô hình trên tập dữ liệu kiểm tra.
@@ -54,7 +56,7 @@ def evaluate_model(model, test_loader, device, class_names):
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    with open("models/CustomModel/model_evaluation_cm.txt", "w") as f:
+    with open(EVALUATION_REPORT_PATH, "w") as f:
         f.write(f"Accuracy Score: {acc:.2f}\n\n")
         f.write("Classification Report:\n")
         f.write(class_report + "\n\n")
@@ -91,5 +93,5 @@ def plot_confusion_matrix(y_true, y_pred, class_names):
     plt.xlabel("Predicted")
     plt.ylabel("True")
     plt.title("Confusion Matrix")
-    plt.savefig("models/CustomModel/confusion_matrix_cm.png")
+    plt.savefig(CONFUSION_MATRIX_PATH)
     plt.show()

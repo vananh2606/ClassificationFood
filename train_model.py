@@ -4,6 +4,8 @@ import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
+BEST_MODEL_PATH = "models/KMS/best_model_efficient.pth"
+TRAINING_HISTORY_PATH = "models/KMS/training_history_efficient.png"
 
 class EarlyStopping:
     """
@@ -163,7 +165,7 @@ def train_model(
                     "val_loss": val_loss,
                     "history": history,
                 },
-                "models/CustomModel/best_model_cm.pth",
+                BEST_MODEL_PATH,
             )
 
     time_elapsed = time.time() - since
@@ -271,5 +273,5 @@ def plot_training_history(history):
     ax2.legend()
 
     plt.tight_layout()
-    plt.savefig("models/CustomModel/training_history_cm.png")
+    plt.savefig(TRAINING_HISTORY_PATH)
     plt.show()

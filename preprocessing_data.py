@@ -6,17 +6,22 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 
 # Map giữa index và tên class
+# labels_map = {
+#     0: "chicken_curry",
+#     1: "chicken_wings",
+#     2: "fried_rice",
+#     3: "grilled_salmon",
+#     4: "hamburger",
+#     5: "ice_cream",
+#     6: "pizza",
+#     7: "ramen",
+#     8: "steak",
+#     9: "sushi",
+# }
 labels_map = {
-    0: "chicken_curry",
-    1: "chicken_wings",
-    2: "fried_rice",
-    3: "grilled_salmon",
-    4: "hamburger",
-    5: "ice_cream",
-    6: "pizza",
-    7: "ramen",
-    8: "steak",
-    9: "sushi",
+    0: "keyboard",
+    1: "mouse",
+    2: "smartphone",
 }
 
 # Class names
