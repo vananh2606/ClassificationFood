@@ -1,3 +1,4 @@
+import glob
 import os
 import cv2 as cv
 import numpy as np
@@ -51,19 +52,30 @@ class FoodDataset(Dataset):
         __getitem__(index): Trả về hình ảnh và nhãn tại chỉ mục `index`.
     """
 
-    def __init__(self, root_dir, transform=None):
+    def __init__(self, root_dir, transform=None, max_samples=None, shuffle=False):
         self.root_dir = root_dir
         self.transform = transform
         self.images = []
         self.labels = []
 
-        for label in os.listdir(root_dir):
-            folder = os.path.join(root_dir, str(label))
-            for image in os.listdir(folder):
-                self.images.append(os.path.join(folder, image))
-                for key, value in labels_map.items():
-                    if value == label:
-                        self.labels.append(key)
+        # Tạo ánh xạ ngược để tra cứu nhanh hơn
+        reverse_map = {value: key for key, value in labels_map.items()}
+
+        for label in sorted(os.listdir(root_dir)):  # Đảm bảo thứ tự ổn định
+            folder_path = os.path.join(root_dir, label)
+            if not os.path.isdir(folder_path):  # Bỏ qua nếu không phải thư mục
+                continue
+
+            image_paths = glob.glob(os.path.join(folder_path, "*.*"))  # Lấy tất cả ảnh
+            if shuffle:
+                np.random.shuffle(image_paths)  # Shuffle trước khi chọn ảnh
+
+            # Giới hạn max_samples cho từng class
+            if max_samples is not None:
+                image_paths = image_paths[:max_samples]
+
+            self.images.extend(image_paths)
+            self.labels.extend([reverse_map[label]] * len(image_paths))
 
     def __len__(self):
         return len(self.images)
@@ -136,7 +148,9 @@ def visualie_dataloader(size, images, labels):
     plt.figure(figsize=(size // 2, size // 2))
     for i in range(size):
         plt.subplot(4, size // 4, i + 1)
-        plt.imshow(np.transpose(np.clip(images[i], 0, 1), (1, 2, 0)))  # (C, H, W) -> (H, W, C)
+        plt.imshow(
+            np.transpose(np.clip(images[i], 0, 1), (1, 2, 0))
+        )  # (C, H, W) -> (H, W, C)
         plt.title(labels_map.get(labels[i].item(), "Unknown"))
         plt.axis("off")
 
