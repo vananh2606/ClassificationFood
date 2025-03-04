@@ -28,8 +28,8 @@ def main():
     NUM_EPOCHS = 100
     LEARNING_RATE = 0.001
 
-    BEST_MODEL_PATH = "models/KMS/best_model_custom.pth"
-    FINAL_MODEL_PATH = "models/KMS/final_model_custom.pth"
+    BEST_MODEL_PATH = "models/KMS/best_model_plus.pth"
+    FINAL_MODEL_PATH = "models/KMS/final_model_plus.pth"
 
     # Xác định device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -86,8 +86,8 @@ def main():
     #     model.classifier[1] = nn.Linear(num_features, num_classes)  # ENetB0
 
     # Sử dụng model
-    model = CustomCNN(num_classes)
-    # model = CustomCNNPlus(num_classes)
+    # model = CustomCNN(num_classes)
+    model = CustomCNNPlus(num_classes)
 
     # Chuyển mô hình sang device
     model = model.to(device)
