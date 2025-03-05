@@ -4,8 +4,8 @@ import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-BEST_MODEL_PATH = "models/KMS/best_model_plus.pth"
-TRAINING_HISTORY_PATH = "models/KMS/training_history_plus.png"
+BEST_MODEL_PATH = "models/KMS/best_model_google.pth"
+TRAINING_HISTORY_PATH = "models/KMS/training_history_google.png"
 
 
 class EarlyStopping:
@@ -96,6 +96,7 @@ def train_model(
     val_dataloader,
     device,
     num_epochs=10,
+    writer=None,
 ):
     """Huấn luyện mô hình PyTorch.
 
@@ -138,6 +139,17 @@ def train_model(
         history["val_acc"].append(val_acc)
         print(f"Val Loss: {val_loss:.4f} Acc: {val_acc:.4f}")
 
+        if writer is not None:
+            # Ghi histogram cơ sở mô hình với TensorBoard
+            for name, param in model.named_parameters():
+                writer.add_histogram(name, param, epoch)
+
+            # Ghi loss và accuracy vào TensorBoard
+            writer.add_scalar("Loss/train", train_loss, epoch)
+            writer.add_scalar("Accuracy/train", train_acc, epoch)
+            writer.add_scalar("Loss/val", val_loss, epoch)
+            writer.add_scalar("Accuracy/val", val_acc, epoch)
+
         # Cập nhật learning rate scheduler nếu có
         if scheduler is not None:
             scheduler.step(val_loss)
@@ -173,6 +185,7 @@ def train_model(
     print(f"Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s")
     print(f"Best val Acc: {best_acc:.4f}")
     plot_training_history(history)
+
     return model, history
 
 

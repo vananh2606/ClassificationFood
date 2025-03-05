@@ -29,7 +29,7 @@ labels_map = {
 class_names = list(labels_map.values())
 
 
-class FoodDataset(Dataset):
+class CustomDataset(Dataset):
     """
     Tạo một dataset tùy chỉnh cho dữ liệu hình ảnh thức ăn.
 
@@ -145,6 +145,8 @@ def visualie_dataloader(size, images, labels):
         images (torch.Tensor): Tensor chứa các hình ảnh.
         labels (torch.Tensor): Tensor chứa nhãn của các hình ảnh.
     """
+    images = images.numpy()
+
     plt.figure(figsize=(size // 2, size // 2))
     for i in range(size):
         plt.subplot(4, size // 4, i + 1)
@@ -159,7 +161,7 @@ def visualie_dataloader(size, images, labels):
 
 def main():
     PATH_FOLDER = "10_food_classes_all_data/test"
-    food_dataset = FoodDataset(PATH_FOLDER)
+    food_dataset = CustomDataset(PATH_FOLDER)
 
     # Visualize image
     image, label = food_dataset[0]

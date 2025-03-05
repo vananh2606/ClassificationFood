@@ -1,18 +1,18 @@
-Accuracy Score: 0.93
+Accuracy Score: 0.92
 
 Classification Report:
               precision    recall  f1-score   support
 
     keyboard       1.00      0.85      0.92        20
-       mouse       0.87      1.00      0.93        20
-  smartphone       0.95      0.95      0.95        20
+       mouse       0.83      1.00      0.91        20
+  smartphone       0.95      0.90      0.92        20
 
-    accuracy                           0.93        60
-   macro avg       0.94      0.93      0.93        60
-weighted avg       0.94      0.93      0.93        60
+    accuracy                           0.92        60
+   macro avg       0.93      0.92      0.92        60
+weighted avg       0.93      0.92      0.92        60
 
 
 Confusion Matrix:
 17 2 1
 0 20 0
-0 1 19
+0 2 18

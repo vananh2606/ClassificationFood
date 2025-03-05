@@ -2,20 +2,19 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
+from torchinfo import summary
 
 
 # Định nghĩa mô hình CNN với Dropout
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
-        self.conv = nn.Conv2d(
-            in_channels=3, out_channels=3, kernel_size=2, stride=1, bias=False
-        )
+        self.conv = nn.Conv2d(in_channels=3, out_channels=3, kernel_size=2, stride=1)
         self.bn = nn.BatchNorm2d(3)
         self.relu = nn.ReLU(inplace=True)
         self.dropout = nn.Dropout(p=0.5)  # Dropout với xác suất tắt 50%
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc = nn.Linear(3 * 1 * 1, 1)  # Fully connected layer
+        self.fc = nn.Linear(64 * 1 * 1, 1)  # Fully connected layer
 
     def forward(self, x, num_epoch):
         self.num_epoch = num_epoch
@@ -38,6 +37,8 @@ class CNN(nn.Module):
 
 # Khởi tạo mô hình
 model = CNN()
+
+summary(model, input_size=(1, 3, 3, 3))
 
 # Tạo dữ liệu đầu vào (3x3x3)
 x = torch.tensor(
@@ -107,6 +108,6 @@ for epoch in range(num_epochs):
 plt.plot(loss_history, label="Loss")
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
-plt.title("Loss giảm dần qua từng epoch với CNN + Dropout")
+plt.title("Loss giảm dần qua từng epoch với CNN")
 plt.legend()
 plt.show()
