@@ -4,8 +4,8 @@ import time
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 
-BEST_MODEL_PATH = "models/KMS/best_model_custom.pth"
-TRAINING_HISTORY_PATH = "models/KMS/training_history_custom.png"
+BEST_MODEL_PATH = "models/KMS/best_model_plus.pth"
+TRAINING_HISTORY_PATH = "models/KMS/training_history_plus.png"
 
 
 class EarlyStopping:
