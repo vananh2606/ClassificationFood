@@ -7,23 +7,23 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 
 # Map giữa index và tên class
-# labels_map = {
-#     0: "chicken_curry",
-#     1: "chicken_wings",
-#     2: "fried_rice",
-#     3: "grilled_salmon",
-#     4: "hamburger",
-#     5: "ice_cream",
-#     6: "pizza",
-#     7: "ramen",
-#     8: "steak",
-#     9: "sushi",
-# }
 labels_map = {
-    0: "keyboard",
-    1: "mouse",
-    2: "smartphone",
+    0: "chicken_curry",
+    1: "chicken_wings",
+    2: "fried_rice",
+    3: "grilled_salmon",
+    4: "hamburger",
+    5: "ice_cream",
+    6: "pizza",
+    7: "ramen",
+    8: "steak",
+    9: "sushi",
 }
+# labels_map = {
+#     0: "keyboard",
+#     1: "mouse",
+#     2: "smartphone",
+# }
 
 # Class names
 class_names = list(labels_map.values())
@@ -40,6 +40,8 @@ class CustomDataset(Dataset):
     Args:
         root_dir (str): Đường dẫn đến thư mục gốc chứa các thư mục con của từng lớp.
         transform (callable, optional): Các phép biến đổi được áp dụng cho hình ảnh. Mặc định là None.
+        max_samples (int, optional): Số lượng mẫu tối đa để đọc từ thư mục gốc. Mặc định là None (không giới hạn).
+        shuffle (bool, optional): Nếu True, sẽ trộn dữ liệu ngẫu nhiên. Mặc định là False.
 
     Attributes:
         root_dir (str): Đường dẫn đến thư mục gốc.

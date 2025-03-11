@@ -4,8 +4,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 
-CONFUSION_MATRIX_PATH = "models/KMS/confusion_matrix_google.png"
-EVALUATION_REPORT_PATH = "models/KMS/model_evaluation_google.txt"
+CONFUSION_MATRIX_PATH = "models/CustomModel/Pro/confusion_matrix_pro.png"
+EVALUATION_REPORT_PATH = "models/CustomModel/Pro/model_evaluation_pro.txt"
 
 
 def evaluate_model(model, test_loader, device, class_names):

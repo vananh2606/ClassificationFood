@@ -1,0 +1,32 @@
+Accuracy Score: 0.79
+
+Classification Report:
+                precision    recall  f1-score   support
+
+ chicken_curry       0.68      0.78      0.73       100
+ chicken_wings       0.81      0.83      0.82       100
+    fried_rice       0.78      0.86      0.82       100
+grilled_salmon       0.72      0.67      0.69       100
+     hamburger       0.88      0.76      0.82       100
+     ice_cream       0.77      0.89      0.82       100
+         pizza       0.92      0.83      0.87       100
+         ramen       0.85      0.78      0.81       100
+         steak       0.70      0.74      0.72       100
+         sushi       0.89      0.79      0.84       100
+
+      accuracy                           0.79      1000
+     macro avg       0.80      0.79      0.79      1000
+  weighted avg       0.80      0.79      0.79      1000
+
+
+Confusion Matrix:
+78 4 3 4 0 1 3 4 2 1
+7 83 0 2 1 1 0 1 5 0
+1 4 86 0 2 2 1 1 3 0
+4 2 5 67 1 4 0 2 11 4
+0 4 1 4 76 5 1 0 7 2
+3 0 0 0 1 89 0 3 1 3
+5 1 4 3 0 3 83 1 0 0
+10 1 6 2 0 2 1 78 0 0
+6 4 2 9 4 1 0 0 74 0
+1 0 3 2 1 8 1 2 3 79
