@@ -3,30 +3,22 @@ import os
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 
-# Map giữa index và tên class
-labels_map = {
-    0: "chicken_curry",
-    1: "chicken_wings",
-    2: "fried_rice",
-    3: "grilled_salmon",
-    4: "hamburger",
-    5: "ice_cream",
-    6: "pizza",
-    7: "ramen",
-    8: "steak",
-    9: "sushi",
-}
-# labels_map = {
-#     0: "keyboard",
-#     1: "mouse",
-#     2: "smartphone",
-# }
-
-# Class names
-class_names = list(labels_map.values())
+# Labels
+class_names = [
+    "chicken_curry",
+    "chicken_wings",
+    "fried_rice",
+    "grilled_salmon",
+    "hamburger",
+    "ice_cream",
+    "pizza",
+    "ramen",
+    "steak",
+    "sushi",
+]
 
 
 class CustomDataset(Dataset):
@@ -60,24 +52,24 @@ class CustomDataset(Dataset):
         self.images = []
         self.labels = []
 
-        # Tạo ánh xạ ngược để tra cứu nhanh hơn
-        reverse_map = {value: key for key, value in labels_map.items()}
-
-        for label in sorted(os.listdir(root_dir)):  # Đảm bảo thứ tự ổn định
+        self.class_names = class_names
+        for idx, label in enumerate(self.class_names):
             folder_path = os.path.join(root_dir, label)
+            print(f"Đang xử lý thư mục: {folder_path}")
             if not os.path.isdir(folder_path):  # Bỏ qua nếu không phải thư mục
                 continue
 
             image_paths = glob.glob(os.path.join(folder_path, "*.*"))  # Lấy tất cả ảnh
+            print(f"Số ảnh trong thư mục {label}: {len(image_paths)}")
             if shuffle:
                 np.random.shuffle(image_paths)  # Shuffle trước khi chọn ảnh
-
-            # Giới hạn max_samples cho từng class
+            
             if max_samples is not None:
                 image_paths = image_paths[:max_samples]
 
-            self.images.extend(image_paths)
-            self.labels.extend([reverse_map[label]] * len(image_paths))
+            for image_path in image_paths:
+                self.images.append(image_path)
+                self.labels.append(idx)
 
     def __len__(self):
         return len(self.images)
@@ -155,22 +147,35 @@ def visualie_dataloader(size, images, labels):
         plt.imshow(
             np.transpose(np.clip(images[i], 0, 1), (1, 2, 0))
         )  # (C, H, W) -> (H, W, C)
-        plt.title(labels_map.get(labels[i].item(), "Unknown"))
+        plt.title(class_names[labels[i]])
         plt.axis("off")
 
     plt.show()
 
 
-def main():
-    PATH_FOLDER = "10_food_classes_all_data/test"
+def test_image():
+    PATH_FOLDER = "10_food_classes_all_data\\test"
     food_dataset = CustomDataset(PATH_FOLDER)
 
     # Visualize image
     image, label = food_dataset[0]
     plt.imshow(image)
-    plt.title(labels_map[label])
+    plt.title(class_names[label])
     plt.show()
+
+def test_batch_image():
+    PATH_FOLDER = "10_food_classes_all_data\\test"
+    _, test_transform = get_transform()
+    food_dataset = CustomDataset(PATH_FOLDER, transform=test_transform)
+    test_dataloader = DataLoader(
+        food_dataset, batch_size=32, shuffle=True
+    )
+    # Visualize image
+    images, labels = next(iter(test_dataloader))
+    visualie_dataloader(size=32, images=images, labels=labels)
+    print(images.shape)
+    print(labels.shape)
 
 
 if __name__ == "__main__":
-    main()
+    test_batch_image()
